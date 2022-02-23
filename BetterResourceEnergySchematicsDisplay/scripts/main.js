@@ -9,7 +9,9 @@ const itemUnicodes = [
     "\uF831",
     "\uF82E",
     "\uF82D",
-    "\uF82C"
+    "\uF82C",
+    "\uF833",
+    "\uF834"
 ];
 const items = [
     Items.copper,
@@ -21,7 +23,9 @@ const items = [
     Items.thorium,
     Items.plastanium,
     Items.phaseFabric,
-    Items.surgeAlloy
+    Items.surgeAlloy,
+    Items.coal,
+    Items.sand,
 ];
 
 let itemMeans = new Array(itemUnicodes.length);
@@ -40,8 +44,6 @@ let bar;
 // schematics
 
 Events.on(ClientLoadEvent, event => {
-    Vars.renderer.minZoom = Vars.renderer.minZoom / 3;
-
     // core items
     for (let i = 0; i < items.length; i++) {
         itemMeans[i] = new WindowedMean(100 * 60);
@@ -72,7 +74,6 @@ Events.on(ClientLoadEvent, event => {
     bar.setWidth(250);
     bar.setHeight(30);
     Vars.ui.hudGroup.addChild(bar);
-
     // search
     let buttons = new Table(Styles.black3);
     buttons.align(Align.topLeft);
@@ -86,130 +87,12 @@ Events.on(ClientLoadEvent, event => {
                 item.getChildren().items.forEach((child) => {
                     if (child instanceof TextField) {
                         child.setText(text);
-                        child.change();
+                        child.change(); 
                     }
                 });
             }
         });
     }
-
-    nestedButtons.labelWrap("Production").pad(2).row();
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.graphite)], Styles.defaultt, () => {
-        setSearchFieldText("Graphite");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.silicon)], Styles.defaultt, () => {
-        setSearchFieldText("Silicon");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.metaglass)], Styles.defaultt, () => {
-        setSearchFieldText("Metaglass");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.plastanium)], Styles.defaultt, () => {
-        setSearchFieldText("Plastanium");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.phaseFabric)], Styles.defaultt, () => {
-        setSearchFieldText("Phase Fabric");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button(itemUnicodes[items.indexOf(Items.surgeAlloy)], Styles.defaultt, () => {
-        setSearchFieldText("Surge Alloy");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.row().labelWrap("Power").pad(2).row();
-
-    nestedButtons.button("\uF877", Styles.defaultt, () => {
-        setSearchFieldText("Steam");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF876", Styles.defaultt, () => {
-        setSearchFieldText("Differential");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF872", Styles.defaultt, () => {
-        setSearchFieldText("Thorium Reactor");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF871", Styles.defaultt, () => {
-        setSearchFieldText("Impact");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.row().labelWrap("Defense").pad(2).row();
-
-    nestedButtons.button("\uF85B", Styles.defaultt, () => {
-        setSearchFieldText("Arc");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF85C", Styles.defaultt, () => {
-        setSearchFieldText("Lancer");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF856", Styles.defaultt, () => {
-        setSearchFieldText("Cyclone");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF860", Styles.defaultt, () => {
-        setSearchFieldText("Standalone");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF854", Styles.defaultt, () => {
-        setSearchFieldText("Monster");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.row().labelWrap("Units").pad(2).row();
-
-    nestedButtons.button("\uF7F6", Styles.defaultt, () => {
-        setSearchFieldText("Flare");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF800", Styles.defaultt, () => {
-        setSearchFieldText("Dagger");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7FA", Styles.defaultt, () => {
-        setSearchFieldText("Crawler");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7F5", Styles.defaultt, () => {
-        setSearchFieldText("Horizon");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7FF", Styles.defaultt, () => {
-        setSearchFieldText("Mace");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7F0", Styles.defaultt, () => {
-        setSearchFieldText("Poly");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.row();
-
-    nestedButtons.button("\uF7F4", Styles.defaultt, () => {
-        setSearchFieldText("Zenith");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7FB", Styles.defaultt, () => {
-        setSearchFieldText("Quasar");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7FE", Styles.defaultt, () => {
-        setSearchFieldText("Fortress");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7C1", Styles.defaultt, () => {
-        setSearchFieldText("Vela");
-    }).height(35).width(35).pad(1);
-
-    nestedButtons.button("\uF7C0", Styles.defaultt, () => {
-        setSearchFieldText("Corvus");
-    }).height(35).width(35).pad(1);
-
-    buttons.pack();
-
-    Vars.ui.hudGroup.addChild(buttons);
 });
 
 Events.run(Trigger.update, () => {
