@@ -1,4 +1,4 @@
-exports.fill = function(source, dir, drill) {
+exports.fill = function (source, dir, drill) {
     let ore = source.overlay();
 
     let defaultConfig = getDefaultConfig(dir);
@@ -29,35 +29,33 @@ exports.fill = function(source, dir, drill) {
     let num_drills = 0;
     let work = true;
     tiles.forEach(tile => {
-        if (work) {
-            if (isDrillTile(tile) && itemMineableAt(tile, drill) == ore.itemDrop) {
-                let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, drill);
-                if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
-                num_drills += 1
-                if (num_drills > 23) {
-                    // maximum titanium conveyor filled
-                    work = false;
+        if (isDrillTile(tile) && itemMineableAt(tile, drill) == ore.itemDrop && work) {
+            let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, drill);
+            if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
+            num_drills += 1
+            if (num_drills > 26) {
+                // maximum titanium conveyor filled
+                work = false;
+            }
+        }
+        if (isBridgeTile(tile)) {
+            let value1 = (dir == 1 || dir == 3) ? tile.centerX() : tile.centerY();
+            let value2 = (dir == 1 || dir == 3) ? tile.centerY() : tile.centerX();
+
+            let config = defaultConfig
+            if (lastBridges.get(value1) == value2) {
+                if (value1 == maxValue1) {
+                    let buildPlan = new BuildPlan(tile.centerX() + defaultConfig.x, tile.centerY() + defaultConfig.y, 0, Blocks.itemBridge, defaultConfig);
+                    Vars.player.unit().addBuild(buildPlan);
+                } else if (value1 < maxValue1) {
+                    config = new Point2(Math.abs(defaultConfig.y), Math.abs(defaultConfig.x));
+                } else if (value1 > maxValue1) {
+                    config = new Point2(-Math.abs(defaultConfig.y), -Math.abs(defaultConfig.x));
                 }
             }
-            if (isBridgeTile(tile)) {
-                let value1 = (dir == 1 || dir == 3) ? tile.centerX() : tile.centerY();
-                let value2 = (dir == 1 || dir == 3) ? tile.centerY() : tile.centerX();
 
-                let config = defaultConfig
-                if (lastBridges.get(value1) == value2) {
-                    if (value1 == maxValue1) {
-                        let buildPlan = new BuildPlan(tile.centerX() + defaultConfig.x, tile.centerY() + defaultConfig.y, 0, Blocks.itemBridge, defaultConfig);
-                        Vars.player.unit().addBuild(buildPlan);
-                    } else if (value1 < maxValue1) {
-                        config = new Point2(Math.abs(defaultConfig.y), Math.abs(defaultConfig.x));
-                    } else if (value1 > maxValue1) {
-                        config = new Point2(-Math.abs(defaultConfig.y), -Math.abs(defaultConfig.x));
-                    }
-                }
-
-                let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, Blocks.itemBridge, config);
-                if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
-            }
+            let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, Blocks.itemBridge, config);
+            if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
         }
     });
 }
@@ -180,7 +178,7 @@ function itemMineableAt(tile, drill) {
     });
 
     itemArray.sort((item1, item2) => {
-        let type = (!item1.lowPriority == !item2.lowPriority) ? 0 : ((!item1.lowPriority == false && !item2.lowPriority == true) ? -1 : 1);
+        let type = (!item1.lowPriority == !item2.lowPriority) ? 0 : ((!item1.lowPriority && !item2.lowPriority) ? -1 : 1);
         if (type != 0) return type;
         let amounts = (oreCount.get(item1.name).count == oreCount.get(item2.name).count) ? 0 : ((oreCount.get(item1.name).count < oreCount.get(item2.name).count) ? -1 : 1);
         if (amounts != 0) return amounts;
