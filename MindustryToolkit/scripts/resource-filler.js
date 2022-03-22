@@ -1,4 +1,4 @@
-exports.fill = function (source, dir, drill) {
+exports.fill = function(source, dir, drill) {
     let ore = source.overlay();
 
     let defaultConfig = getDefaultConfig(dir);
@@ -26,30 +26,38 @@ exports.fill = function (source, dir, drill) {
                 break;
         }
     });
-
+    let num_drills = 0;
+    let work = true;
     tiles.forEach(tile => {
-        if (isDrillTile(tile) && itemMineableAt(tile, drill) == ore.itemDrop) {
-            let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, drill);
-            if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
-        }
-        if (isBridgeTile(tile)) {
-            let value1 = (dir == 1 || dir == 3) ? tile.centerX() : tile.centerY();
-            let value2 = (dir == 1 || dir == 3) ? tile.centerY() : tile.centerX();
-
-            let config = defaultConfig
-            if (lastBridges.get(value1) == value2) {
-                if (value1 == maxValue1) {
-                    let buildPlan = new BuildPlan(tile.centerX() + defaultConfig.x, tile.centerY() + defaultConfig.y, 0, Blocks.itemBridge, defaultConfig);
-                    Vars.player.unit().addBuild(buildPlan);
-                } else if (value1 < maxValue1) {
-                    config = new Point2(Math.abs(defaultConfig.y), Math.abs(defaultConfig.x));
-                } else if (value1 > maxValue1) {
-                    config = new Point2(-Math.abs(defaultConfig.y), -Math.abs(defaultConfig.x));
+        if (work) {
+            if (isDrillTile(tile) && itemMineableAt(tile, drill) == ore.itemDrop) {
+                let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, drill);
+                if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
+                num_drills += 1
+                if (num_drills > 23) {
+                    // maximum titanium conveyor filled
+                    work = false;
                 }
             }
+            if (isBridgeTile(tile)) {
+                let value1 = (dir == 1 || dir == 3) ? tile.centerX() : tile.centerY();
+                let value2 = (dir == 1 || dir == 3) ? tile.centerY() : tile.centerX();
 
-            let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, Blocks.itemBridge, config);
-            if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
+                let config = defaultConfig
+                if (lastBridges.get(value1) == value2) {
+                    if (value1 == maxValue1) {
+                        let buildPlan = new BuildPlan(tile.centerX() + defaultConfig.x, tile.centerY() + defaultConfig.y, 0, Blocks.itemBridge, defaultConfig);
+                        Vars.player.unit().addBuild(buildPlan);
+                    } else if (value1 < maxValue1) {
+                        config = new Point2(Math.abs(defaultConfig.y), Math.abs(defaultConfig.x));
+                    } else if (value1 > maxValue1) {
+                        config = new Point2(-Math.abs(defaultConfig.y), -Math.abs(defaultConfig.x));
+                    }
+                }
+
+                let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, Blocks.itemBridge, config);
+                if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
+            }
         }
     });
 }
@@ -123,7 +131,7 @@ function isBridgeTile(tile) {
 }
 
 function getDefaultConfig(dir) {
-    switch(dir) {
+    switch (dir) {
         case 0:
             return new Point2(3, 0);
             break;
@@ -153,9 +161,15 @@ function itemMineableAt(tile, drill) {
                 let drop = drill.getDrop(other);
 
                 if (oreCount.has(drop.name)) {
-                    oreCount.set(drop.name, {item: drop, count: oreCount.get(drop.name).count + 1});
+                    oreCount.set(drop.name, {
+                        item: drop,
+                        count: oreCount.get(drop.name).count + 1
+                    });
                 } else {
-                    oreCount.set(drop.name, {item: drop, count: 1});
+                    oreCount.set(drop.name, {
+                        item: drop,
+                        count: 1
+                    });
                 }
             }
         }

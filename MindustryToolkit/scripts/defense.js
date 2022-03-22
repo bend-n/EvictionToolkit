@@ -5,7 +5,11 @@ exports.place = function (name, x, y, coresUnloaders, tile, replace) {
     let buildPlans = Vars.schematics.toRequests(schematic, x, y);
 
     if (replace) {
-        coresUnloaders.set(tile, { phase: [], surge: [], recentlyAdded: 0 });
+        coresUnloaders.set(tile, {
+            phase: [],
+            surge: [],
+            recentlyAdded: 0
+        });
     }
 
     buildPlans.forEach(buildPlan => {

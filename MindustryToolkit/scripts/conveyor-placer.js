@@ -1,4 +1,4 @@
-exports.place = function(tiles, conveyor) {
+exports.place = function (tiles, conveyor) {
     let rotation = 0;
     for (let i = 0; i < tiles.length - 1; i++) {
         let current = tiles[i];

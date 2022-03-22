@@ -4,7 +4,7 @@ exports.fill = function (source) {
     let tiles = [];
     searchOreTiles(source, ore, tiles);
 
-    if (tiles.length > 180) {
+    if (tiles.length > 700) {
         Vars.player.sendMessage("Too many tiles to search for");
 
         return;
@@ -37,10 +37,13 @@ exports.fill = function (source) {
     let startX = maxTile.centerX();
     let startY = maxTile.centerY();
 
-    let maxMaxRet = {tiles: [], count: 0};
+    let maxMaxRet = {
+        tiles: [],
+        count: 0
+    };
     for (let x = startX; x < startX + 4; x++) {
         for (let y = startY; y < startY + 4; y++) {
-            let start = Vars.world.tile(x,y);
+            let start = Vars.world.tile(x, y);
 
             if (oreCounts.has(start.centerX() + "" + start.centerY())) {
                 let maxRet = searchAirblastSpots(start, enoughOreTiles, oreCounts, 0, [], 0);
@@ -88,9 +91,15 @@ function itemMineableAtCount(tile, drill, ore) {
                 let drop = drill.getDrop(other);
 
                 if (oreCount.has(drop.name)) {
-                    oreCount.set(drop.name, {item: drop, count: oreCount.get(drop.name).count + 1});
+                    oreCount.set(drop.name, {
+                        item: drop,
+                        count: oreCount.get(drop.name).count + 1
+                    });
                 } else {
-                    oreCount.set(drop.name, {item: drop, count: 1});
+                    oreCount.set(drop.name, {
+                        item: drop,
+                        count: 1
+                    });
                 }
             }
         }
@@ -131,11 +140,17 @@ function searchAirblastSpots(currentTile, tiles, oreCounts, currentSum, currentT
     });
 
     if (filteredTiles.length == 0 || depth >= 5) {
-        return {tiles: newCurrentTiles, count: currentSum};
+        return {
+            tiles: newCurrentTiles,
+            count: currentSum
+        };
     }
 
     let max = currentSum;
-    let maxRet = {tiles: newCurrentTiles, count: currentSum};
+    let maxRet = {
+        tiles: newCurrentTiles,
+        count: currentSum
+    };
     filteredTiles.forEach(tile => {
         let ret = searchAirblastSpots(tile, filteredTiles, oreCounts, currentSum, newCurrentTiles, depth++);
         if (ret.count > max) {

@@ -20,7 +20,7 @@ function searchAdjacentTiles(building, tiles, recursive) {
     let var3 = nearby.length;
     let buildings = new Set();
 
-    for(let var4 = 0; var4 < var3; ++var4) {
+    for (let var4 = 0; var4 < var3; ++var4) {
         let point = var2[var4];
 
         let tile = Vars.world.tile(building.tile.x + point.x, building.tile.y + point.y);

@@ -29,9 +29,11 @@ let icon_tsunami;
 let icon_forcefield;
 
 let table;
-let enabled = false, enabledTable;
+let enabled = false,
+    enabledTable;
 
-let unloaderEnabled = false, unloaderTable;
+let unloaderEnabled = false,
+    unloaderTable;
 
 let configureQueue = [];
 
@@ -120,7 +122,7 @@ Events.on(ClientLoadEvent, event => {
 
         UnitCommand.all.forEach(cmd => {
             buttons.button(commandRegions[cmd.ordinal()], Styles.clearToggleTransi, run(() => {
-                let cc = Vars.indexer.findClosestFlag(0,0, Vars.player.team(), BlockFlag.rally);
+                let cc = Vars.indexer.findClosestFlag(0, 0, Vars.player.team(), BlockFlag.rally);
 
                 if (cc == null) return;
 
@@ -181,7 +183,7 @@ Events.on(ClientLoadEvent, event => {
             return;
         }
 
-        let cc = Vars.indexer.findClosestFlag(0,0, Vars.player.team(), BlockFlag.rally);
+        let cc = Vars.indexer.findClosestFlag(0, 0, Vars.player.team(), BlockFlag.rally);
 
         if (cc == null) return;
 
@@ -314,14 +316,24 @@ Events.on(ClientLoadEvent, event => {
             if (health > 100) {
                 if (health > 3000) {
                     unloaders.phase.forEach(unloader => {
-                        if (unloader.build != null && unloader.build.config() == Items.sporePod && configureQueue.find(e => { e.tile.pos() == unloader.pos() }) == undefined) {
-                            configureQueue.unshift({tile: unloader, item: Items.phaseFabric});
+                        if (unloader.build != null && unloader.build.config() == Items.sporePod && configureQueue.find(e => {
+                                e.tile.pos() == unloader.pos()
+                            }) == undefined) {
+                            configureQueue.unshift({
+                                tile: unloader,
+                                item: Items.phaseFabric
+                            });
                         }
                     });
                 } else if (health < 1000) {
                     unloaders.phase.forEach(unloader => {
-                        if (unloader.build != null && unloader.build.config() == Items.phaseFabric && configureQueue.find(e => { e.tile.pos() == unloader.pos() }) == undefined) {
-                            configureQueue.unshift({tile: unloader, item: Items.sporePod});
+                        if (unloader.build != null && unloader.build.config() == Items.phaseFabric && configureQueue.find(e => {
+                                e.tile.pos() == unloader.pos()
+                            }) == undefined) {
+                            configureQueue.unshift({
+                                tile: unloader,
+                                item: Items.sporePod
+                            });
                         }
                     });
                 }
@@ -329,8 +341,13 @@ Events.on(ClientLoadEvent, event => {
 
             if (unloaders.recentlyAdded > 0) {
                 unloaders.phase.forEach(unloader => {
-                    if (unloader.build != null && unloader.build.config() == Items.phaseFabric && configureQueue.find(e => { e.tile.pos() == unloader.pos() }) == undefined) {
-                        configureQueue.unshift({tile: unloader, item: Items.sporePod});
+                    if (unloader.build != null && unloader.build.config() == Items.phaseFabric && configureQueue.find(e => {
+                            e.tile.pos() == unloader.pos()
+                        }) == undefined) {
+                        configureQueue.unshift({
+                            tile: unloader,
+                            item: Items.sporePod
+                        });
                         unloaders.recentlyAdded = unloaders.recentlyAdded - 1;
                     }
                 });
@@ -344,8 +361,13 @@ Events.on(ClientLoadEvent, event => {
             }
 
             unloaders.surge.forEach(unloader => {
-                if (unloader.build != null && unloader.build.config() != ammunitionItem && configureQueue.find(e => { e.tile.pos() == unloader.pos() }) == undefined) {
-                    configureQueue.push({tile: unloader, item: ammunitionItem});
+                if (unloader.build != null && unloader.build.config() != ammunitionItem && configureQueue.find(e => {
+                        e.tile.pos() == unloader.pos()
+                    }) == undefined) {
+                    configureQueue.push({
+                        tile: unloader,
+                        item: ammunitionItem
+                    });
                 }
             });
 
@@ -362,9 +384,17 @@ Events.on(ClientLoadEvent, event => {
                     let item = unloaderTile.build.config();
 
                     if (coreItems < (value.item == null ? 10 : 50) + index * (value.item == null ? 10 : 50)) {
-                        if (!resetUnloaders.has(unloaderTile) && configureQueue.find(e => { e.tile.pos() == unloaderTile.pos() }) == undefined) {
-                            resetUnloaders.set(unloaderTile, {item: item, i: index});
-                            configureQueue.push({tile: unloaderTile, item: Items.sporePod});
+                        if (!resetUnloaders.has(unloaderTile) && configureQueue.find(e => {
+                                e.tile.pos() == unloaderTile.pos()
+                            }) == undefined) {
+                            resetUnloaders.set(unloaderTile, {
+                                item: item,
+                                i: index
+                            });
+                            configureQueue.push({
+                                tile: unloaderTile,
+                                item: Items.sporePod
+                            });
                         }
                     }
                 } else if (unloaderTile.build == null || unloaderTile.block() != Blocks.unloader) {
@@ -377,8 +407,13 @@ Events.on(ClientLoadEvent, event => {
             let coreItems = Vars.player.team().items().get(value.item == null ? Items.silicon : value.item);
 
             if (coreItems > (value.item == null ? 30 : 150) + value.i * (value.item == null ? 10 : 50)) {
-                if (tile.build != null && tile.block() == Blocks.unloader && configureQueue.find(e => { e.tile.pos() == tile.pos() }) == undefined) {
-                    configureQueue.push({tile: tile, item: value.item});
+                if (tile.build != null && tile.block() == Blocks.unloader && configureQueue.find(e => {
+                        e.tile.pos() == tile.pos()
+                    }) == undefined) {
+                    configureQueue.push({
+                        tile: tile,
+                        item: value.item
+                    });
                 }
                 map.delete(tile);
             }
@@ -410,7 +445,10 @@ Events.on(TapEvent, event => {
                             Fx.heal.at(adjacentTile.getX(), adjacentTile.getY(), 0);
                         }
                     } else {
-                        let obj = {item: adjacentTile.build.config(), unloaders: [adjacentTile]};
+                        let obj = {
+                            item: adjacentTile.build.config(),
+                            unloaders: [adjacentTile]
+                        };
 
                         unloaderTiles.set(config, obj);
                         Fx.heal.at(adjacentTile.getX(), adjacentTile.getY(), 0);
@@ -467,8 +505,7 @@ Events.on(TapEvent, event => {
             table.button(image, Styles.defaulti, run(() => {
                 table.clearChildren();
 
-                table.button(Icon.cancel, Styles.defaulti, run(() => {
-                })).maxSize(55).get().visible = false;
+                table.button(Icon.cancel, Styles.defaulti, run(() => {})).maxSize(55).get().visible = false;
                 table.button(Icon.up, Styles.defaulti, run(() => {
                     resourceFiller.fill(tile, 1, drill);
                     table.remove();
@@ -492,8 +529,7 @@ Events.on(TapEvent, event => {
 
                 table.row();
 
-                table.button(Icon.cancel, Styles.defaulti, run(() => {
-                })).maxSize(55).get().visible = false;
+                table.button(Icon.cancel, Styles.defaulti, run(() => {})).maxSize(55).get().visible = false;
                 table.button(Icon.down, Styles.defaulti, run(() => {
                     resourceFiller.fill(tile, 3, drill);
                     table.remove();
@@ -510,7 +546,7 @@ Events.on(TapEvent, event => {
     }
 
     if (tile.build != null && tile.build.block == Blocks.coreShard) {
-        defensePlacementUI(icon_copper_wall_large, "toolkit_def_copper", tile, 9, 9, -8, -8, false, false);
+        defensePlacementUI(icon_copper_wall_large, "toolkit_def_copper", tile, 9, 9, -8, -8, false, false); // tHIS PART IS WHERE IT NEEDS MODIFICAITON
         defensePlacementUI(icon_thorium_wall_large, "toolkit_def_thorium", tile, 10, 10, -8, -8, false, false);
         defensePlacementUI(icon_phase_wall_large, "toolkit_def_phase", tile, 9, 9, -8, -8, false, false);
         defensePlacementUI(icon_surge_wall_large, "toolkit_def_surge", tile, 9, 9, -8, -8, false, false);
@@ -562,8 +598,7 @@ function defensePlacementUI(icon, name, tile, os0, os1, os2, os3, newrow, replac
     table.button(new TextureRegionDrawable(icon), Styles.defaulti, run(() => {
         table.clearChildren();
 
-        table.button(Icon.cancel, Styles.defaulti, run(() => {
-        })).maxSize(55).get().visible = false;
+        table.button(Icon.cancel, Styles.defaulti, run(() => {})).maxSize(55).get().visible = false;
         table.button(Icon.up, Styles.defaulti, run(() => {
             defensePlacer.place(name + "_1", tile.centerX(), tile.centerY() + os1, coresUnloaders, tile, replace);
             table.remove();
@@ -587,8 +622,7 @@ function defensePlacementUI(icon, name, tile, os0, os1, os2, os3, newrow, replac
 
         table.row();
 
-        table.button(Icon.cancel, Styles.defaulti, run(() => {
-        })).maxSize(55).get().visible = false;
+        table.button(Icon.cancel, Styles.defaulti, run(() => {})).maxSize(55).get().visible = false;
         table.button(Icon.down, Styles.defaulti, run(() => {
             defensePlacer.place(name + "_3", tile.centerX(), tile.centerY() + os3, coresUnloaders, tile, replace);
             table.remove();
