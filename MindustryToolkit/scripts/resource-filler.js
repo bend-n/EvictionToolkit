@@ -31,8 +31,10 @@ exports.fill = function (source, dir, drill) {
     tiles.forEach(tile => {
         if (isDrillTile(tile) && itemMineableAt(tile, drill) == ore.itemDrop && work) {
             let buildPlan = new BuildPlan(tile.centerX(), tile.centerY(), 0, drill);
-            if (buildPlan.placeable(Vars.player.team())) Vars.player.unit().addBuild(buildPlan);
-            num_drills += 1
+            if (buildPlan.placeable(Vars.player.team())) {
+                Vars.player.unit().addBuild(buildPlan);
+                num_drills += 1;
+            }
             if (num_drills > 26) {
                 // maximum titanium conveyor filled
                 work = false;
@@ -124,8 +126,7 @@ function isBridgeTile(tile) {
     let x = tile.centerX();
     let y = tile.centerY();
 
-    if (x % 3 == 0 && y % 3 == 0) return true;
-    return false;
+    return x % 3 == 0 && y % 3 == 0
 }
 
 function getDefaultConfig(dir) {

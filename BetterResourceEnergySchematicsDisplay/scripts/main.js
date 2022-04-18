@@ -1,18 +1,4 @@
 // core items
-const itemUnicodes = [
-    "\uF838",
-    "\uF837",
-    "\uF835",
-    "\uF82F",
-    "\uF836",
-    "\uF832",
-    "\uF831",
-    "\uF82E",
-    "\uF82D",
-    "\uF82C",
-    "\uF833",
-    "\uF834"
-];
 const items = [
     Items.copper,
     Items.lead,
@@ -28,10 +14,11 @@ const items = [
     Items.sand,
 ];
 
-let itemMeans = new Array(itemUnicodes.length);
-let lastValues = new Array(itemUnicodes.length);
+let itemMeans = new Array(items.length);
+let lastValues = new Array(items.length);
 
 let table;
+let nestedTable;
 let labels = [];
 
 // power
@@ -41,19 +28,36 @@ let powerBalance = 0;
 
 let bar;
 
-// schematics
+function add_item(item) {
+    items.push(item);
+    // Log.info(new WindowedMean(100 * 60).fill(0.0).rawMean())
+    let mean = new WindowedMean(100 * 60)
+    mean.fill(0.0)
+    if (mean == undefined) return "how"
+    itemMeans.push(mean);
+    lastValues.push(0);
+    labels.push(nestedTable.labelWrap("").width(180).pad(1).get());
+    nestedTable.row();
+}
+
+global.uiitems = items
+global.add_item = add_item
 
 Events.on(ClientLoadEvent, event => {
-    // core items
+    /* core items */
+    let mean = new WindowedMean(100 * 60)
+    mean.fill(0.0)
+    print(mean.rawMean())
+    Vars.mods.getScripts().runConsole("this.additem = global.add_item");
     for (let i = 0; i < items.length; i++) {
         itemMeans[i] = new WindowedMean(100 * 60);
         itemMeans[i].fill(0.0);
         lastValues[i] = 0;
     }
 
-    table = new Table(Styles.black3);
-    table.setPosition(10, 674);
-    let nestedTable = table.table().margin(3).get();
+    table = new Table(Styles.none);
+    table.setPosition(10, 500);
+    nestedTable = table.table().margin(3).get();
     table.align(Align.topLeft);
 
     for (let i = 0; i < items.length; i++) {
@@ -63,8 +67,10 @@ Events.on(ClientLoadEvent, event => {
     table.pack();
     Vars.ui.hudGroup.addChild(table);
 
-    // power
-    bar = new Bar("Power: ", Pal.accent, floatp(()=>{ return getBatteryBalance(); }));
+    /* power*/
+    bar = new Bar("Power: ", Pal.accent, floatp(() => {
+        return getBatteryBalance();
+    }));
     bar.set(prov(() => {
         return "Power: " + (powerBalance > 0 ? "[#00ff00]+" : "[#ff0000]") + formatNumber(powerBalance * 60.0, true);
     }), floatp(() => {
@@ -74,25 +80,11 @@ Events.on(ClientLoadEvent, event => {
     bar.setWidth(250);
     bar.setHeight(30);
     Vars.ui.hudGroup.addChild(bar);
-    // search
+    /* search */
     let buttons = new Table(Styles.black3);
     buttons.align(Align.topLeft);
     buttons.setPosition(1620, 480);
-    let nestedButtons = buttons.table().margin(3).get();
-
-    let setSearchFieldText = (text) => {
-        Vars.ui.schematics.show();
-        Vars.ui.schematics.cont.getChildren().items.forEach((item) => {
-            if (item instanceof Group) {
-                item.getChildren().items.forEach((child) => {
-                    if (child instanceof TextField) {
-                        child.setText(text);
-                        child.change(); 
-                    }
-                });
-            }
-        });
-    }
+    add_item(Items.copper)
 });
 
 Events.run(Trigger.update, () => {
@@ -105,20 +97,25 @@ Events.run(Trigger.update, () => {
     let meanMax = 0;
 
     let reset = true;
-    for (let i = 0; i < items.length; i++) {
-        if (lastValues[i] > 0) reset = false;
-
-        if (lastValues[i] < latestMin) latestMin = lastValues[i];
-        if (lastValues[i] > latestMax) latestMax = lastValues[i];
-        if (itemMeans[i].rawMean() < meanMin) meanMin = itemMeans[i].rawMean();
-        if (itemMeans[i].rawMean() > meanMax) meanMax = itemMeans[i].rawMean();
+    try {
+        for (let i = 0; i < items.length; i++) {
+            if (lastValues[i] > 0) reset = false;
+            if (itemMeans[i] == undefined) break
+            // Log.info(items[i].emoji() + " " + itemMeans[i].rawMean())
+            if (lastValues[i] < latestMin) latestMin = lastValues[i];
+            if (lastValues[i] > latestMax) latestMax = lastValues[i];
+            if (itemMeans[i].rawMean() < meanMin) meanMin = itemMeans[i].rawMean();
+            if (itemMeans[i].rawMean() > meanMax) meanMax = itemMeans[i].rawMean();
+        }
+    } catch (e) {
+        Log.info(e)
     }
 
     for (let i = 0; i < items.length; i++) {
         let currentValue = currentItems.get(items[i]);
 
         if (reset) lastValues[i] = currentValue;
-
+        if (itemMeans[i] == undefined) break
         let text = getItemText(i, lastValues[i], latestMin, latestMax, itemMeans[i].rawMean(), meanMin, meanMax);
 
         labels[i].setText(text);
@@ -171,7 +168,7 @@ function getItemText(index, latest, latestMin, latestMax, mean, meanMin, meanMax
     let meanString = "(" + ((mean === 0) ? closer : (mean > 0 ? getNormalizedColor(125, 100, mean, 0, meanMax, true) + "+" : getNormalizedColor(0, 100, mean, meanMin, 0, false))) +
         formatNumber(mean, false) + closer + ")";
 
-    return itemUnicodes[index] + " " + latestString + " " + meanString;
+    return items[index].emoji() + " " + latestString + " " + meanString;
 }
 
 function getNormalizedColor(h, s, value, min, max, reverse) {
@@ -182,6 +179,7 @@ function getNormalizedColor(h, s, value, min, max, reverse) {
 }
 
 function HSLToHex(h, s, l) {
+    // cursed function
     s /= 100;
     l /= 100;
 
@@ -232,6 +230,7 @@ function HSLToHex(h, s, l) {
 
     return "#" + r + g + b;
 }
+
 
 function formatNumber(number, round) {
     let abs = Math.abs(number);
