@@ -133,16 +133,12 @@ function getDefaultConfig(dir) {
     switch (dir) {
         case 0:
             return new Point2(3, 0);
-            break;
         case 1:
             return new Point2(0, 3);
-            break;
         case 2:
             return new Point2(-3, 0);
-            break;
         case 3:
             return new Point2(0, -3);
-            break;
     }
 }
 

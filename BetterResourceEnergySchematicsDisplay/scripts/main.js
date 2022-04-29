@@ -1,17 +1,7 @@
 // core items
-const items = [
+let items = [
     Items.copper,
-    Items.lead,
-    Items.graphite,
-    Items.silicon,
-    Items.metaglass,
-    Items.titanium,
-    Items.thorium,
-    Items.plastanium,
-    Items.phaseFabric,
-    Items.surgeAlloy,
-    Items.coal,
-    Items.sand,
+    Items.lead
 ];
 
 let itemMeans = new Array(items.length);
@@ -26,11 +16,12 @@ let stored = 0;
 let battery = 0.01;
 let powerBalance = 0;
 
+let has_loaded = false
+
 let bar;
 
 function add_item(item) {
     items.push(item);
-    // Log.info(new WindowedMean(100 * 60).fill(0.0).rawMean())
     let mean = new WindowedMean(100 * 60)
     mean.fill(0.0)
     if (mean == undefined) return "how"
@@ -43,8 +34,20 @@ function add_item(item) {
 global.uiitems = items
 global.add_item = add_item
 
+// Events.on(WorldLoadEvent, event => {
+//     Log.info("world lead event")
+//     if (!has_loaded) return
+//     items = [Items.copper, Items.lead]
+//     labels = []
+//     for (let i = 0; i < items.length; i++) {
+//         labels.push(nestedTable.labelWrap("").width(180).pad(1).get());
+//         // nestedTable.row();
+//     }
+// })
+
 Events.on(ClientLoadEvent, event => {
     /* core items */
+    has_loaded = true
     let mean = new WindowedMean(100 * 60)
     mean.fill(0.0)
     print(mean.rawMean())
@@ -56,7 +59,7 @@ Events.on(ClientLoadEvent, event => {
     }
 
     table = new Table(Styles.none);
-    table.setPosition(10, 500);
+    table.setPosition(10, 700); // extends down
     nestedTable = table.table().margin(3).get();
     table.align(Align.topLeft);
 
@@ -80,16 +83,49 @@ Events.on(ClientLoadEvent, event => {
     bar.setWidth(250);
     bar.setHeight(30);
     Vars.ui.hudGroup.addChild(bar);
-    /* search */
-    let buttons = new Table(Styles.black3);
-    buttons.align(Align.topLeft);
-    buttons.setPosition(1620, 480);
-    add_item(Items.copper)
+    Timer.schedule(() => {
+        // look for new items
+        let currentItems = Vars.player.team().items();
+        // Log.info("checking for new item")
+        for (let i = 0; i < all.length; i++) {
+            if (!items.includes(all[i])) {
+                if (currentItems.get(all[i]) != 0) {
+                    add_item(all[i]);
+                    Log.info("applyed " + all[i].emoji() + " " + all[i].name)
+                }
+                // Log.info(all[i].emoji() + all[i].name + " not in core")
+            }
+            // Log.info(all[i].emoji() + " " + all[i].name + "is in the list")
+        }
+    }, 3, 3);
 });
+
+const all = [
+    Items.copper,
+    Items.lead,
+    Items.graphite,
+    Items.silicon,
+    Items.metaglass,
+    Items.titanium,
+    Items.thorium,
+    Items.plastanium,
+    Items.phaseFabric,
+    Items.surgeAlloy,
+    Items.coal,
+    Items.sand,
+    Items.blastCompound,
+    Items.pyratite,
+    Items.sporePod,
+    Items.scrap // eeeh
+]
+
+
 
 Events.run(Trigger.update, () => {
     // core items
     let currentItems = Vars.player.team().items();
+
+
 
     let latestMin = Number.POSITIVE_INFINITY;
     let latestMax = 0;
@@ -100,7 +136,10 @@ Events.run(Trigger.update, () => {
     try {
         for (let i = 0; i < items.length; i++) {
             if (lastValues[i] > 0) reset = false;
-            if (itemMeans[i] == undefined) break
+            if (itemMeans[i] == undefined) {
+                Log.info("stop");
+                break
+            }
             // Log.info(items[i].emoji() + " " + itemMeans[i].rawMean())
             if (lastValues[i] < latestMin) latestMin = lastValues[i];
             if (lastValues[i] > latestMax) latestMax = lastValues[i];
@@ -139,6 +178,7 @@ Events.run(Trigger.update, () => {
 
                 if (graphs.indexOf(graph) < 0) {
                     stored += graph.getBatteryStored();
+                    if (stored == 0) stored == 1;
                     battery += graph.getTotalBatteryCapacity();
                     powerBalance += graph.getPowerBalance();
 
